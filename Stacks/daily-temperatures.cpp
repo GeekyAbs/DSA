@@ -1,3 +1,6 @@
+// for almost any monotonic stack problems like NGE
+// while(!stack.empty() && bad_condition)
+//    stack.pop();
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -8,7 +11,7 @@ vector<int> dailyTemperatures(vector<int> &temperatures){
 
   for(int i=n-1; i>=0; i--){
     int curr = temperatures[i];
-    while (!s.empty() && temperatures[s.top()] < curr){
+    while (!s.empty() && temperatures[s.top()] <= curr){
       s.pop();
     }
     if (s.empty()){
