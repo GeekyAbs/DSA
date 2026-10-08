@@ -20,12 +20,12 @@ Most tree problems reduce to a single question: should I use DFS (go deep first)
 
 **Where This Appears in Interviews:**
 
-|Company Type|How This Section Appears|
-|---|---|
-|FAANG / Big Tech|Diameter of Binary Tree, Validate BST, and Lowest Common Ancestor are top-20 most-asked|
-|Mid-size companies|Maximum Depth, Level Order Traversal, and Path Sum are common phone screen questions|
-|Startups|Tree problems are less frequent but appear when testing recursive thinking|
-|Online assessments|Tree traversal and BST problems are common timed questions|
+| Company Type       | How This Section Appears                                                                |
+| ------------------ | --------------------------------------------------------------------------------------- |
+| FAANG / Big Tech   | Diameter of Binary Tree, Validate BST, and Lowest Common Ancestor are top-20 most-asked |
+| Mid-size companies | Maximum Depth, Level Order Traversal, and Path Sum are common phone screen questions    |
+| Startups           | Tree problems are less frequent but appear when testing recursive thinking              |
+| Online assessments | Tree traversal and BST problems are common timed questions                              |
 
 **Core Idea for This Section:**  
 Most tree problems are DFS or BFS plus a decision about what information flows down (parameters) and what information returns upward (return values).
@@ -36,18 +36,18 @@ Most tree problems are DFS or BFS plus a decision about what information flows d
 
 **Key Terms:**
 
-|Term|Definition|
-|---|---|
-|Root|The topmost node, has no parent|
-|Leaf|A node with no children (both left and right are `nullptr`)|
-|Edge|A connection between a parent and a child|
-|Depth|Distance from the root to a node (root has depth 0)|
-|Height|Distance from a node to its deepest leaf descendant (leaf has height 0)|
-|Subtree|A node plus all of its descendants|
-|Binary tree|Each node has at most two children|
-|Binary search tree (BST)|Left subtree values < node value < right subtree values|
-|Balanced tree|Height difference between left and right subtrees is at most 1|
-|Complete tree|Every level is full except possibly the last, which fills left to right|
+| Term                     | Definition                                                              |
+| ------------------------ | ----------------------------------------------------------------------- |
+| Root                     | The topmost node, has no parent                                         |
+| Leaf                     | A node with no children (both left and right are `nullptr`)             |
+| Edge                     | A connection between a parent and a child                               |
+| Depth                    | Distance from the root to a node (root has depth 0)                     |
+| Height                   | Distance from a node to its deepest leaf descendant (leaf has height 0) |
+| Subtree                  | A node plus all of its descendants                                      |
+| Binary tree              | Each node has at most two children                                      |
+| Binary search tree (BST) | Left subtree values < node value < right subtree values                 |
+| Balanced tree            | Height difference between left and right subtrees is at most 1          |
+| Complete tree            | Every level is full except possibly the last, which fills left to right |
 
 **The Standard Node Definition:**
 
@@ -75,11 +75,11 @@ Think of every tree problem as a set of decisions made at each node. At each nod
 **Three Ways to Visit Nodes:**  
 The difference between preorder, inorder, and postorder is when you process the current node relative to its children.
 
-|Traversal|Order|When to Use|
-|---|---|---|
-|Preorder|Node, Left, Right|When you need to process the node before its children (copying a tree, serialization)|
-|Inorder|Left, Node, Right|When you need sorted order from a BST|
-|Postorder|Left, Right, Node|When you need children’s results before processing the node (computing height, diameter)|
+| Traversal | Order             | When to Use                                                                              |
+| --------- | ----------------- | ---------------------------------------------------------------------------------------- |
+| Preorder  | Node, Left, Right | When you need to process the node before its children (copying a tree, serialization)    |
+| Inorder   | Left, Node, Right | When you need sorted order from a BST                                                    |
+| Postorder | Left, Right, Node | When you need children’s results before processing the node (computing height, diameter) |
 
 **Templates:**
 
@@ -568,18 +568,29 @@ This tree passes the naive check (1 < 5, 6 > 5, 3 < 6, 7 > 6) but is NOT a valid
 Each node has a valid range. The root can be anything. The left child must be less than the parent. The right child must be greater. These constraints propagate downward, narrowing the range at each level.
 
 ```cpp
-bool isValidBST(TreeNode* root) {
-    function<bool(TreeNode*, long long, long long)> validate =
-        [&](TreeNode* node, long long low, long long high) -> bool {
-            if (!node) return true;
-            if (node->val <= low || node->val >= high) return false;
-            return validate(node->left, low, node->val) &&
-                   validate(node->right, node->val, high);
-        };
-    return validate(root,
-                    numeric_limits<long long>::min(),
-                    numeric_limits<long long>::max());
-}
+class Solution {
+
+private:
+
+	bool validate(TreeNode* root, long long minn, long long maxx){
+	
+	if(!root) return true;
+	
+	if(root->val <= minn || root->val >= maxx) return false;
+	
+	return validate(root->left, minn, root->val) && validate(root->right, root->val, maxx);
+	
+	}
+
+public:
+
+	bool isValidBST(TreeNode* root) {
+	
+	return validate(root, LLONG_MIN, LLONG_MAX);
+	
+	}
+
+};
 ```
 
 Use `long long` bounds so that a node valued `INT_MIN` or `INT_MAX` at the root is still valid.
@@ -669,12 +680,57 @@ What approach applies?
 
 Answer: Exploit the BST property. If both p and q are less than the current node, the LCA is in the left subtree. If both are greater, the LCA is in the right subtree. If they split (one on each side), the current node is the LCA. Time: O(h). This is simpler than the general binary tree LCA on section 17 because the BST ordering tells you which subtree to search.
 
+```C++
+class Solution {
+
+public:
+	
+	TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+	
+	if(!root || root==p || root==q) {
+	return root;
+	}
+	
+	TreeNode* left = lowestCommonAncestor(root->left, p, q);
+	TreeNode* right = lowestCommonAncestor(root->right, p, q);
+	
+	if(!left) return right;
+	
+	if(!right) return left;
+	
+	else return root;
+	}
+};
+```
+
 **Problem 3:**  
 Given a BST, find the kth smallest element.
 
 What approach applies?
 
 Answer: Inorder traversal (section 3). Since inorder on a BST gives sorted order, the kth element in the inorder sequence is the kth smallest. Use either recursive or iterative inorder and count nodes until you reach k.
+
+```C++
+class Solution {
+
+public:
+
+	vector<int> tree;
+	
+	void inorderTraversal(TreeNode* root){
+	if(!root) return;
+	inorderTraversal(root->left);
+	tree.push_back(root->val);
+	inorderTraversal(root->right);
+	}
+	
+	int kthSmallest(TreeNode* root, int k) {
+	inorderTraversal(root);
+	return tree[k-1];
+	}
+
+};
+```
 
 **Interview Relevance:** These three problems demonstrate three different uses of BST properties: level structure (BFS), ordering (ancestor search), and sorted traversal (inorder). Recognizing which property to exploit is the key skill.
 
